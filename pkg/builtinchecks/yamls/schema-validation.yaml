@@ -1,5 +1,5 @@
 name: "schema-validation"
-description: "Validate Kubernetes resources against their schemas using kubeconform"
+description: "Validate Kubernetes resources against their schemas using kubeconform. The lint command also reports resources that cannot be loaded."
 remediation: "Fix the resource to conform to the Kubernetes API schema."
 scope:
   objectKinds:
