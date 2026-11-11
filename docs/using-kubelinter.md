@@ -157,10 +157,14 @@ mkdir kube-linter/
 tar -xf kube-linter-linux.tar.gz -C "kube-linter/"
 
 ```
-and pass `--fail-on-invalid-resource` as an option to have your pipeline fail if your YAML file can't be parsed. See the following example:
+and enable `schema-validation` to have your pipeline fail when resources cannot
+be loaded or do not conform to their schemas:
 ```bash
-./kube-linter/kube-linter lint --fail-on-invalid-resource /path/to/yaml-file.yaml
+./kube-linter/kube-linter lint --include schema-validation /path/to/yaml-file.yaml
 ```
+
+See [schema validation and loading errors](configuring-kubelinter.md#schema-validation-and-loading-errors)
+for configuration details.
 
 ## KubeLinter commands
 

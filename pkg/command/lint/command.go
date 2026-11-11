@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -82,6 +83,11 @@ func Command() *cobra.Command {
 				fmt.Fprintln(os.Stderr, "Warning: no checks enabled.")
 				return nil
 			}
+			// Schema validation must also fail for resources that could not be
+			// loaded, since those resources never reach per-object checks.
+			reportInvalidResources := errorOnInvalidResource ||
+				slices.Contains(enabledChecks, "schema-validation")
+
 			ignorePaths, err := configresolver.GetIgnorePaths(&cfg)
 			if err != nil {
 				return err
@@ -112,7 +118,7 @@ func Command() *cobra.Command {
 				_, _ = fmt.Fprintf(os.Stderr, "Warning: failed to load object from %s: %v\n", invalidObj.Object.Metadata.FilePath, invalidObj.Diagnostic.Message)
 			}
 
-			var atLeastOneObjectFound = errorOnInvalidResource && len(invalidObjectsResult) > 0
+			atLeastOneObjectFound := reportInvalidResources && len(invalidObjectsResult) > 0
 			for _, lintCtx := range lintCtxs {
 				if len(lintCtx.Objects()) > 0 {
 					atLeastOneObjectFound = true
@@ -133,8 +139,9 @@ func Command() *cobra.Command {
 				return err
 			}
 
-			if errorOnInvalidResource {
+			if reportInvalidResources && len(invalidObjectsResult) > 0 {
 				result.Reports = append(result.Reports, invalidObjectsResult...)
+				result.Summary.ChecksStatus = run.ChecksFailed
 			}
 
 			// Validate and pair formats with outputs
@@ -215,7 +222,7 @@ func Command() *cobra.Command {
 		"Output file path (can be repeated). Must match the number of --format flags. "+
 			"If omitted, all outputs go to stdout")
 	c.Flags().BoolVarP(&errorOnInvalidResource, "fail-on-invalid-resource", "", false, "Error out when we have an invalid resource")
-	_ = c.Flags().MarkDeprecated("fail-on-invalid-resource", "Use 'schema-validation' builtin check or kubeconform template for better schema validation.")
+	_ = c.Flags().MarkDeprecated("fail-on-invalid-resource", "Enable the 'schema-validation' builtin check to report invalid resources and validate schemas.")
 
 	config.AddFlags(c, v)
 	return c

@@ -610,7 +610,7 @@ AllowPrivilegedContainer: true
 
 **Enabled by default**: No
 
-**Description**: Validate Kubernetes resources against their schemas using kubeconform
+**Description**: Validate Kubernetes resources against their schemas using kubeconform. The lint command also reports resources that cannot be loaded.
 
 **Remediation**: Fix the resource to conform to the Kubernetes API schema.
 

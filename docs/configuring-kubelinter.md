@@ -99,6 +99,32 @@ example,
 > [!TIP] > `exclude` always takes precedence, if you include and exclude the same check,
 > KubeLinter always skips the check.
 
+## Schema validation and loading errors
+
+Enable the built-in `schema-validation` check to validate resource schemas and
+fail the `lint` command when input resources cannot be loaded:
+
+```yaml
+checks:
+  include:
+    - schema-validation
+```
+
+For example, an environment variable with `value: true` cannot be decoded into
+a Kubernetes object, so it never reaches the per-object schema check. With
+`schema-validation` enabled, the loading error is reported as
+`failed-to-load-object` and the command fails. This also applies when other
+resources in the same input load successfully. Empty and comment-only YAML
+documents are ignored.
+
+Loading errors occur before per-object checks, so the ignore annotations
+described below cannot suppress them. Files excluded with `ignorePaths` are
+still ignored.
+
+This loading-error policy is enabled by the built-in `schema-validation` check.
+A custom check based on the `kubeconform` template does not enable it on its own.
+The deprecated `--fail-on-invalid-resource` flag retains its existing behavior.
+
 ## Ignoring violations for specific cases
 
 To ignore violations for specific objects, users can add an annotation with the key
